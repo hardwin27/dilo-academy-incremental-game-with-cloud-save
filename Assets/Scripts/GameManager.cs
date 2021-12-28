@@ -33,31 +33,36 @@ public class GameManager : MonoBehaviour
     private List<ResourceController> _activeResources = new List<ResourceController>();
     private List<TapText> _tapTextPool = new List<TapText>();
     private float _collectSecond;
-    public double TotalGold { get; private set; }
+    /*public double TotalGold { get; private set; }*/
 
     private void AddAllResources()
     {
         bool showResources = true;
+        int index = 0;
+
         foreach(ResourceConfig config in ResourceConfigs)
         {
             GameObject obj = Instantiate(ResourcePrefarbs.gameObject, ResourceParent, false);
             ResourceController resource = obj.GetComponent<ResourceController>();
 
-            resource.SetConfig(config);
+            resource.SetConfig(index, config);
             obj.gameObject.SetActive(showResources);
             if(showResources && !resource.isUnlocked)
             {
                 showResources = false;
             }
             _activeResources.Add(resource);
+            index++;
         }
     }
 
     public void AddGold(double value)
 
     {
-        TotalGold += value;
-        GoldInfo.text = $"Gold: { TotalGold.ToString("0") }";
+        UserDataManager.Progress.gold += value;
+        GoldInfo.text = $"Gold: { UserDataManager.Progress.gold.ToString("0") }";
+
+        UserDataManager.Save();
     }
 
     private void CollectPerSecond()
@@ -115,14 +120,14 @@ public class GameManager : MonoBehaviour
     {
         foreach(ResourceController resource in _activeResources)
         {
-            bool isBuyable = TotalGold >= resource.GetUpgradeCost();
+            bool isBuyable = false;
             if(resource.isUnlocked)
             {
-                isBuyable = TotalGold >= resource.GetUpgradeCost();
+                isBuyable = UserDataManager.Progress.gold >= resource.GetUpgradeCost();
             }
             else
             {
-                isBuyable = TotalGold >= resource.GetUnlockCost();
+                isBuyable = UserDataManager.Progress.gold >= resource.GetUnlockCost();
             }
             resource.ResourceImage.sprite = ResourceSprites[isBuyable ? 1 : 0];
         }
@@ -143,6 +148,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         AddAllResources();
+        GoldInfo.text = $"Gold: { UserDataManager.Progress.gold.ToString("0") }";
     }
 
     private void Update()
