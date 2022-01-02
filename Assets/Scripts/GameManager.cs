@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
     }
 
     [Range(0f, 1f)] public float AutoCollectPercecntage = 0.1f;
+    public float SaveDelay = 5f;
     public ResourceConfig[] ResourceConfigs;
     public Sprite[] ResourceSprites;
     public Transform ResourceParent;
@@ -33,6 +34,7 @@ public class GameManager : MonoBehaviour
     private List<ResourceController> _activeResources = new List<ResourceController>();
     private List<TapText> _tapTextPool = new List<TapText>();
     private float _collectSecond;
+    private float _saveDelayCounter;
     /*public double TotalGold { get; private set; }*/
 
     private void AddAllResources()
@@ -62,7 +64,12 @@ public class GameManager : MonoBehaviour
         UserDataManager.Progress.gold += value;
         GoldInfo.text = $"Gold: { UserDataManager.Progress.gold.ToString("0") }";
 
-        UserDataManager.Save();
+        UserDataManager.Save(_saveDelayCounter < 0f);
+
+        if(_saveDelayCounter < 0f)
+        {
+            _saveDelayCounter = SaveDelay;
+        }
     }
 
     private void CollectPerSecond()
@@ -153,7 +160,10 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        _collectSecond += Time.unscaledDeltaTime;
+        float deltaTime = Time.unscaledDeltaTime;
+        _saveDelayCounter -= deltaTime;
+
+        _collectSecond += deltaTime;
         if(_collectSecond >= 1f)
         {
             CollectPerSecond();
