@@ -1,0 +1,9 @@
+# ----------------------------------------
+# Events
+# ----------------------------------------
+Event Name,Count,Users,Mark as conversion
+first_open,1,1,true
+level_up,28,1,false
+screen_view,1,1,false
+session_start,1,1,false
+unlock_achievement,1,1,false
